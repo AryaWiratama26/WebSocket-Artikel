@@ -1,22 +1,20 @@
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: 8080 });
 
-console.log("WebSocket server berjalan di ws://localhost:8080");
+function getRandomTemperature() {
+  return (20 + Math.random() * 10).toFixed(2);
+}
 
 wss.on('connection', function connection(ws) {
-  console.log('Klien terhubung.');
+  console.log('Client terhubung');
 
-  ws.on('message', function incoming(message) {
-    console.log('Pesan diterima:', message.toString());
-
-    wss.clients.forEach(function each(client) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(message.toString());
-      }
+  const interval = setInterval(() => {
+    const data = JSON.stringify({
+      suhu: getRandomTemperature(),
+      waktu: new Date().toLocaleTimeString()
     });
-  });
+    ws.send(data);
+  }, 1000);
 
-  ws.on('close', () => {
-    console.log("Klien terputus.");
-  });
+  ws.on('close', () => clearInterval(interval));
 });
